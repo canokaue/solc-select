@@ -46,8 +46,23 @@ def valid_version(version):
     # check that it matches <digit>.<digit>.<digit>
     match = re.search("^(\d+).(\d+).(\d+)$", version)
     if match is None:
-        raise argparse.ArgumentTypeError(f"Invalid Solidity version{version}.")
+        raise argparse.ArgumentTypeError(f"Invalid Solidity version {version}. expecting something like `0.4.25`")
+    versions_available_for_download = sorted(get_available_versions().keys())
+    min_version = versions_available_for_download[0]
+    max_version = versions_available_for_download[-1]
+    if available_versions:
+        if is_out_of_bounds(version, min_version):
+            raise argparse.ArgumentTypeError(f"Solidity version {version} too low. Earliest version available is {min_version}")
+        elif is_out_of_bounds(max_version, version):
+            raise argparse.ArgumentTypeError(f"Solidity version {version} too high. Highest version available is {max_version}")
+
     return version
+
+
+def is_out_of_bounds(version1, version2):
+    int_v1 = int(version1.replace(".", ""))
+    int_v2 = int(version2.replace(".", ""))
+    return int_v1 < int_v2
 
 
 # TODO: figure out how whether these can be optimized
